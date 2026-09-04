@@ -171,8 +171,27 @@ The following functionality was successfully verified:
 - AWS infrastructure destruction
 - Removal of the Terraform S3 state bucket and DynamoDB lock table
 
-Project screenshots will be stored under [`docs/evidence`](docs/evidence).
+## Project Evidence
 
+### Application Homepage
+
+![OpenTelemetry application homepage](docs/evidence/01-application-homepage.png)
+
+### Kubernetes Pods Running
+
+![Kubernetes pods running successfully](docs/evidence/02-kubernetes-pods-running.png)
+
+### Application Through AWS Load Balancer
+
+![Application accessed through AWS Load Balancer](docs/evidence/03-aws-load-balancer-application.png)
+
+### Kubernetes Ingress and ALB
+
+![Kubernetes Ingress creating the AWS ALB](docs/evidence/04-kubernetes-ingress-alb.png)
+
+### Successful Checkout
+
+![Successful end-to-end checkout](docs/evidence/05-checkout-order-complete.png)
 ## Repository Structure
 
 ```text
