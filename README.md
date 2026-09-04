@@ -1,141 +1,223 @@
-**Note:** This project is a fork of `opentelemetry-demo`. Thanks to the team and contributors for opensourcing this wonderful demo project. Definitely one of the best on internet.
+# AWS EKS GitOps E-Commerce Platform
 
-<!-- markdownlint-disable-next-line -->
-# <img src="https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png" alt="OTel logo" width="45"> OpenTelemetry Demo
+A production-style DevOps project deploying the OpenTelemetry Astronomy Shop microservices application to Amazon EKS using Terraform, Docker, Kubernetes, GitHub Actions, and Argo CD.
 
-[![Slack](https://img.shields.io/badge/slack-@cncf/otel/demo-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C03B4CWV4DA)
-[![Version](https://img.shields.io/github/v/release/open-telemetry/opentelemetry-demo?color=blueviolet)](https://github.com/open-telemetry/opentelemetry-demo/releases)
-[![Commits](https://img.shields.io/github/commits-since/open-telemetry/opentelemetry-demo/latest?color=ff69b4&include_prereleases)](https://github.com/open-telemetry/opentelemetry-demo/graphs/commit-activity)
-[![Downloads](https://img.shields.io/docker/pulls/otel/demo)](https://hub.docker.com/r/otel/demo)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=red)](https://github.com/open-telemetry/opentelemetry-demo/blob/main/LICENSE)
-[![Integration Tests](https://github.com/open-telemetry/opentelemetry-demo/actions/workflows/run-integration-tests.yml/badge.svg)](https://github.com/open-telemetry/opentelemetry-demo/actions/workflows/run-integration-tests.yml)
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/opentelemetry-demo)](https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-demo)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9247/badge)](https://www.bestpractices.dev/en/projects/9247)
+This project demonstrates infrastructure as code, container CI, Kubernetes deployment, GitOps-based continuous delivery, troubleshooting, and end-to-end application validation.
 
-## Welcome to the OpenTelemetry Astronomy Shop Demo
+> **Project status:** Successfully deployed and tested. The AWS infrastructure was later destroyed to prevent ongoing cloud charges. All reusable configuration remains in this repository.
 
-This repository contains the OpenTelemetry Astronomy Shop, a microservice-based
-distributed system intended to illustrate the implementation of OpenTelemetry in
-a near real-world environment.
+## Project Highlights
 
-Our goals are threefold:
+- Provisioned a custom AWS VPC and Amazon EKS cluster using modular Terraform.
+- Deployed a distributed e-commerce application composed of multiple microservices.
+- Implemented a GitHub Actions CI pipeline for the Product Catalog service.
+- Built and published a versioned Docker image to Docker Hub.
+- Automatically updated the Kubernetes deployment manifest with the new image tag.
+- Configured Argo CD for automated GitOps synchronization and self-healing.
+- Diagnosed Kubernetes networking, pod scheduling, service routing, and gRPC connectivity issues.
+- Successfully validated the complete shopping and checkout journey.
+- Safely destroyed the cloud infrastructure after testing to control AWS costs.
 
-- Provide a realistic example of a distributed system that can be used to
-  demonstrate OpenTelemetry instrumentation and observability.
-- Build a base for vendors, tooling authors, and others to extend and
-  demonstrate their OpenTelemetry integrations.
-- Create a living example for OpenTelemetry contributors to use for testing new
-  versions of the API, SDK, and other components or enhancements.
+## Architecture
 
-We've already made [huge
-progress](https://github.com/open-telemetry/opentelemetry-demo/blob/main/CHANGELOG.md),
-and development is ongoing. We hope to represent the full feature set of
-OpenTelemetry across its languages in the future.
+```mermaid
+flowchart TD
+    Developer["Code push"] --> GitHub["GitHub repository"]
+    GitHub --> Actions["GitHub Actions CI"]
+    Actions --> DockerHub["Docker Hub image"]
+    Actions --> Manifest["Kubernetes manifest update"]
+    Manifest --> ArgoCD["Argo CD GitOps"]
+    ArgoCD --> EKS["Amazon EKS"]
+    EKS --> App["OpenTelemetry microservices"]
+    User["Customer"] --> App
+```
 
-If you'd like to help (**which we would love**), check out our [contributing
-guidance](./CONTRIBUTING.md).
+## Technology Stack
 
-If you'd like to extend this demo or maintain a fork of it, read our
-[fork guidance](https://opentelemetry.io/docs/demo/forking/).
+| Area | Technologies |
+|---|---|
+| Cloud | AWS, Amazon EKS, VPC, IAM |
+| Infrastructure as Code | Terraform |
+| Containers | Docker, Docker Hub |
+| Orchestration | Kubernetes |
+| Continuous Integration | GitHub Actions |
+| Continuous Delivery | Argo CD, Argo CD, GitOps |
+| Application | OpenTelemetry Astronomy Shop microservices |
+| Troubleshooting | kubectl, logs, events, Services and Endpoints |
+| Version Control | Git and GitHub |
 
-## Quick start
+## CI/CD and GitOps Workflow
 
-You can be up and running with the demo in a few minutes. Check out the docs for
-your preferred deployment method:
+1. Code is pushed to the GitHub repository.
+2. GitHub Actions validates and builds the Product Catalog service.
+3. The pipeline builds a Docker image.
+4. The image is pushed to Docker Hub with a unique build tag.
+5. GitHub Actions updates the Kubernetes deployment manifest.
+6. Argo CD detects the Git change.
+7. Argo CD synchronizes the desired configuration to Amazon EKS.
+8. Kubernetes performs the application rollout.
+9. The application is tested through the frontend checkout workflow.
 
-- [Docker](https://opentelemetry.io/docs/demo/docker_deployment/)
-- [Kubernetes](https://opentelemetry.io/docs/demo/kubernetes_deployment/)
+Published Product Catalog image:
 
-## Documentation
+```text
+sugunamc/product-catalog:33811286729
+```
 
-For detailed documentation, see [Demo Documentation][docs]. If you're curious
-about a specific feature, the [docs landing page][docs] can point you in the
-right direction.
+- [GitHub Actions workflow](.github/workflows/ci.yaml)
+- [Docker Hub repository](https://hub.docker.com/r/sugunamc/product-catalog)
+- [Product Catalog Kubernetes manifests](kubernetes/productcatalog)
+- [Argo CD Application manifest](argocd/product-catalog-application.yaml)
 
-## Demos featuring the Astronomy Shop
+## Infrastructure as Code
 
-We welcome any vendor to fork the project to demonstrate their services and
-adding a link below. The community is committed to maintaining the project and
-keeping it up to date for you.
+The AWS infrastructure is defined in [`infrastructure/terraform`](infrastructure/terraform).
 
-|                           |                |                                  |
-|---------------------------|----------------|----------------------------------|
-| [AlibabaCloud LogService] | [Elastic]      | [OpenSearch]                     |
-| [AppDynamics]             | [Google Cloud] | [Sentry]                         |
-| [Aspecto]                 | [Grafana Labs] | [ServiceNow Cloud Observability] |
-| [Axiom]                   | [Guance]       | [Splunk]                         |
-| [Axoflow]                 | [Honeycomb.io] | [Sumo Logic]                     |
-| [Azure Data Explorer]     | [Instana]      | [TelemetryHub]                   |
-| [Coralogix]               | [Kloudfuse]    | [Teletrace]                      |
-| [Dash0]                   | [Liatrio]      | [Tracetest]                      |
-| [Datadog]                 | [Logz.io]      | [Uptrace]                        |
-| [Dynatrace]               | [New Relic]    |                                  |
+The Terraform configuration includes:
 
-## Contributing
+- Reusable VPC module
+- Public and private subnets
+- Amazon EKS control plane
+- EKS worker-node configuration
+- IAM roles and policies
+- Terraform remote-state backend configuration
+- S3 state storage and DynamoDB state locking
 
-To get involved with the project see our [CONTRIBUTING](CONTRIBUTING.md)
-documentation. Our [SIG Calls](CONTRIBUTING.md#join-a-sig-call) are every other
-Monday at 8:30 AM PST and anyone is welcome.
+The configuration was checked using:
 
-## Project leadership
+```bash
+terraform fmt -check -recursive
+terraform init -backend=false
+terraform validate
+```
 
-[Maintainers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer)
-([@open-telemetry/demo-maintainers](https://github.com/orgs/open-telemetry/teams/demo-maintainers)):
+Terraform validation completed successfully.
 
-- [Juliano Costa](https://github.com/julianocosta89), Datadog
-- [Mikko Viitanen](https://github.com/mviitane), Dynatrace
-- [Pierre Tessier](https://github.com/puckpuck), Honeycomb
+> The live infrastructure and remote backend were deleted after the demonstration. The Terraform configuration remains available as a reusable infrastructure blueprint.
 
-[Approvers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver)
-([@open-telemetry/demo-approvers](https://github.com/orgs/open-telemetry/teams/demo-approvers)):
+## Kubernetes and GitOps
 
-- [Cedric Ziel](https://github.com/cedricziel) Grafana Labs
-- [Penghan Wang](https://github.com/wph95), AppDynamics
-- [Reiley Yang](https://github.com/reyang), Microsoft
-- [Roger Coll](https://github.com/rogercoll), Elastic
-- [Ziqi Zhao](https://github.com/fatsheep9146), Alibaba
+Kubernetes manifests are stored under [`kubernetes`](kubernetes).
 
-Emeritus:
+Argo CD was configured with:
 
-- [Austin Parker](https://github.com/austinlparker)
-- [Carter Socha](https://github.com/cartersocha)
-- [Michael Maxwell](https://github.com/mic-max)
-- [Morgan McLean](https://github.com/mtwo)
+- GitHub as the source of truth
+- Automatic synchronization
+- Self-healing enabled
+- Kubernetes manifests from `kubernetes/productcatalog`
+- Deployment to the `default` namespace
 
-### Thanks to all the people who have contributed
+The declarative Argo CD configuration is stored at:
 
-[![contributors](https://contributors-img.web.app/image?repo=open-telemetry/opentelemetry-demo)](https://github.com/open-telemetry/opentelemetry-demo/graphs/contributors)
+```text
+argocd/product-catalog-application.yaml
+```
 
-[docs]: https://opentelemetry.io/docs/demo/
+## Troubleshooting Case Study
 
-<!-- Links for Demos featuring the Astronomy Shop section -->
+During deployment, the frontend loaded but the product cards were missing.
 
-[AlibabaCloud LogService]: https://github.com/aliyun-sls/opentelemetry-demo
-[AppDynamics]: https://www.appdynamics.com/blog/cloud/how-to-observe-opentelemetry-demo-app-in-appdynamics-cloud/
-[Aspecto]: https://github.com/aspecto-io/opentelemetry-demo
-[Axiom]: https://play.axiom.co/axiom-play-qf1k/dashboards/otel.traces.otel-demo-traces
-[Axoflow]: https://axoflow.com/opentelemetry-support-in-more-detail-in-axosyslog-and-syslog-ng/
-[Azure Data Explorer]: https://github.com/Azure/Azure-kusto-opentelemetry-demo
-[Coralogix]: https://coralogix.com/blog/configure-otel-demo-send-telemetry-data-coralogix
-[Dash0]: https://github.com/dash0hq/opentelemetry-demo
-[Datadog]: https://docs.datadoghq.com/opentelemetry/guide/otel_demo_to_datadog
-[Dynatrace]: https://www.dynatrace.com/news/blog/opentelemetry-demo-application-with-dynatrace/
-[Elastic]: https://github.com/elastic/opentelemetry-demo
-[Google Cloud]: https://github.com/GoogleCloudPlatform/opentelemetry-demo
-[Grafana Labs]: https://github.com/grafana/opentelemetry-demo
-[Guance]: https://github.com/GuanceCloud/opentelemetry-demo
-[Honeycomb.io]: https://github.com/honeycombio/opentelemetry-demo
-[Instana]: https://github.com/instana/opentelemetry-demo
-[Kloudfuse]: https://github.com/kloudfuse/opentelemetry-demo
-[Liatrio]: https://github.com/liatrio/opentelemetry-demo
-[Logz.io]: https://logz.io/learn/how-to-run-opentelemetry-demo-with-logz-io/
-[New Relic]: https://github.com/newrelic/opentelemetry-demo
-[OpenSearch]: https://github.com/opensearch-project/opentelemetry-demo
-[Sentry]: https://github.com/getsentry/opentelemetry-demo
-[ServiceNow Cloud Observability]: https://docs.lightstep.com/otel/quick-start-operator#send-data-from-the-opentelemetry-demo
-[Splunk]: https://github.com/signalfx/opentelemetry-demo
-[Sumo Logic]: https://www.sumologic.com/blog/common-opentelemetry-demo-application/
-[TelemetryHub]: https://github.com/TelemetryHub/opentelemetry-demo/tree/telemetryhub-backend
-[Teletrace]: https://github.com/teletrace/opentelemetry-demo
-[Tracetest]: https://github.com/kubeshop/opentelemetry-demo
-[Uptrace]: https://github.com/uptrace/uptrace/tree/master/example/opentelemetry-demo
+### Symptoms
+
+- The Product Catalog pod was running.
+- Kubernetes Service and Endpoint objects existed.
+- The frontend returned a gRPC connection error.
+- The application could not connect to the Product Catalog service.
+
+### Investigation
+
+I examined the deployment using:
+
+```bash
+kubectl get pods
+kubectl get events
+kubectl logs
+kubectl get services
+kubectl get endpoints
+kubectl rollout status
+```
+
+The Product Catalog logs showed that its gRPC server was listening on port `8088`, while the Kubernetes Service was forwarding traffic to port `8080`.
+
+### Root Cause
+
+```text
+Service targetPort: 8080
+Container listening port: 8088
+```
+
+
+The Product Catalog Service was corrected to use:
+
+```yaml
+targetPort: 8088
+```
+
+The fix was committed to GitHub. Argo CD detected the change and synchronized it to the cluster. Product images then appeared, and the complete checkout flow worked successfully.
+
+I also diagnosed temporary `FailedCreatePodSandbox` events caused by AWS CNI IP allocation and single-node pod-capacity constraints.
+
+## Validation
+
+The following functionality was successfully verified:
+
+- Product Catalog pod running with the CI-generated Docker image
+- Argo CD application showing Healthy and Synced
+- Product images displayed through the frontend
+- Product selection and cart functionality
+- Checkout workflow across multiple microservices
+- Final “Your order is complete!” confirmation
+- Terraform configuration validation
+- AWS infrastructure destruction
+- Removal of the Terraform S3 state bucket and DynamoDB lock table
+
+Project screenshots will be stored under [`docs/evidence`](docs/evidence).
+
+## Repository Structure
+
+```text
+├── .github/workflows/                 # GitHub Actions CI pipeline
+├── argocd/                            # Argo CD Application manifest
+├── infrastructure/terraform/          # AWS VPC and EKS Terraform code
+├── kubernetes/                        # Kubernetes manifests
+├── src/                               # Application microservices
+├── docs/evidence/                     # Deployment evidence
+└── docs/UPSTREAM_README.md             # Original project documentation
+```
+
+## Security and Cost Management
+
+- AWS credentials and application secrets are not stored in this repository.
+- Terraform state files and variable files are excluded through `.gitignore`.
+- Infrastructure was destroyed after successful testing.
+- The EKS cluster, networking resources, NAT Gateway, S3 state bucket, and DynamoDB lock table were verified as deleted.
+
+## Key Learning Outcomes
+
+This project provided practical experience with:
+
+- Building reusable AWS infrastructure using Terraform modules
+- Managing container images through an automated CI pipeline
+- Deploying and troubleshooting microservices on Kubernetes
+- Implementing GitOps continuous delivery with Argo CD
+- Investigating failures through logs, events, Services, and Endpoints
+- Correcting configuration at the Git source of truth
+- Validating a complete distributed application workflow
+- Managing cloud resources responsibly to avoid unnecessary costs
+
+## Attribution
+
+The application source is based on the open-source [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo), maintained by the OpenTelemetry community.
+
+The AWS infrastructure, Product Catalog CI workflow, Kubernetes deployment changes, Argo CD GitOps configuration, deployment validation, and troubleshooting documented in this fork were completed as part of my DevOps portfolio implementation.
+
+The original project README is preserved at [`docs/UPSTREAM_README.md`](docs/UPSTREAM_README.md).
+
+## Author
+
+**Suguna**
+
+- GitHub: [Suguna1802](https://github.com/Suguna1802)
+- Docker Hub: [sugunamc](https://hub.docker.com/u/sugunamc)
+
+
